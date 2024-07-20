@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		timesheets.push(timesheet);
 		localStorage.setItem("timesheets", JSON.stringify(timesheets));
 		displayTimesheets();
+		displayTotalTimeForCurrentDate();
 		displayTotalTimeWorked();
 	}
 
