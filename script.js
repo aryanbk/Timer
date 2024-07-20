@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
 	const resetButton = document.getElementById("resetButton");
 	const clearButton = document.getElementById("clearButton");
 	const timerDisplay = document.getElementById("timer");
-	const timeDisplay = document.getElementById("time");
 	const timesheetTable = document.getElementById("timesheetTable");
 	const taskInput = document.getElementById("task-name");
 	const catInput = document.getElementById("category");
@@ -144,12 +143,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		displayTotalTimeWorked();
 	}
 
-	window.onbeforeunload = function () {
-		return "Current timer will be lost if you refresh the page. Are you sure?";
-	};
-
 	displayTimeSheets();
 	displayTodayTime();
 	displayTotalTimeWorked();
-	setInterval(displayTodayTime, 60000); // Update today's time every minute
+	setInterval(displayTodayTime, 60000);
 });
