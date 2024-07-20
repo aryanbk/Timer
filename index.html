@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title id="title">Timer Web App</title>
-		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="styles.css" />
 		<link rel="icon" type="image/x-icon" href="sand-clock-16.png" />
 	</head>
 	<body>
@@ -20,6 +20,7 @@
 			<button id="stopButton">Stop</button>
 			<button id="resetButton">Reset</button>
 			<button id="clearButton">Clear</button>
+			<button id="updateDateButton">Update Date</button>
 		</div>
 		<br />
 		<div class="display-container">
@@ -33,9 +34,9 @@
 				"
 			>
 				<p id="timer">00:00:00</p>
+				<p id="todayTime"></p>
 				<p id="totalTimeWorked"></p>
 			</div>
-			<p id="todayTime"></p>
 		</div>
 		<div class="timesheets-container">
 			<h3>Timesheets</h3>

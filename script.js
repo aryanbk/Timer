@@ -15,13 +15,26 @@ document.addEventListener("DOMContentLoaded", (event) => {
 	const timesheetTable = document.getElementById("timesheetTable");
 	const taskInput = document.getElementById("task-name");
 	const catInput = document.getElementById("category");
-	const todayTimeDisplay = document.getElementById("h1");
+	const headingDisplay = document.getElementById("h1");
 	const totalTimeWorkedDisplay = document.getElementById("totalTimeWorked");
+	const totalTimeForCurrentDateDisplay = document.getElementById("todayTime");
+	const updateDateButton = document.getElementById("updateDateButton");
 
 	startButton.addEventListener("click", startTimer);
 	stopButton.addEventListener("click", stopTimer);
 	resetButton.addEventListener("click", resetTimer);
 	clearButton.addEventListener("click", clearTimer);
+
+	let currentDate = getCurrentDateFromStorage();
+
+	updateDateButton.addEventListener("click", updateCurrentDate);
+
+	function updateCurrentDate() {
+		currentDate = new Date();
+		saveCurrentDateToStorage(currentDate);
+		updateHeading();
+		displayTotalTimeForCurrentDate();
+	}
 
 	function startTimer() {
 		if (!running && taskInput.value.trim() != "") {
@@ -30,6 +43,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 			startTime = new Date().getTime();
 			tInterval = setInterval(getShowTime, 1);
 			running = true;
+			saveCurrentDateToStorage(currentDate);
 		}
 	}
 
@@ -71,6 +85,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 			time: timerDisplay.innerHTML,
 			task: taskName,
 			category: catName,
+			date: formatDate(currentDate),
 		};
 		const timeSheets = getStoredTimeSheets();
 		timeSheets.push(timeSheet);
@@ -92,14 +107,17 @@ document.addEventListener("DOMContentLoaded", (event) => {
 			const tdTime = document.createElement("td");
 			const tdTask = document.createElement("td");
 			const tdCat = document.createElement("td");
+			const tdDate = document.createElement("td");
 
 			tdTime.innerText = timeSheet.time;
 			tdTask.innerText = timeSheet.task;
 			tdCat.innerText = timeSheet.category;
+			tdDate.innerText = timeSheet.date;
 
 			tr.appendChild(tdTime);
 			tr.appendChild(tdTask);
 			tr.appendChild(tdCat);
+			tr.appendChild(tdDate);
 
 			timesheetTable.appendChild(tr);
 		});
@@ -109,7 +127,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		const now = new Date();
 		const hours = now.getHours();
 		const minutes = now.getMinutes();
-		todayTimeDisplay.innerText =
+		headingDisplay.innerText =
 			"Timer  " +
 			(hours < 10 ? "0" + hours : hours) +
 			":" +
@@ -137,14 +155,67 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		totalTimeWorkedDisplay.innerText = "Total " + totalTime;
 	}
 
+	function displayTotalTimeForCurrentDate() {
+		const timeSheets = getStoredTimeSheets();
+		let totalSeconds = 0;
+
+		timeSheets.forEach((timeSheet) => {
+			if (timeSheet.date === formatDate(currentDate)) {
+				const [hours, minutes, seconds] = timeSheet.time
+					.split(":")
+					.map(Number);
+				totalSeconds += hours * 3600 + minutes * 60 + seconds;
+			}
+		});
+
+		const totalHours = Math.floor(totalSeconds / 3600);
+		const totalMinutes = Math.floor((totalSeconds % 3600) / 60);
+		const totalTime =
+			(totalHours < 10 ? "0" + totalHours : totalHours) +
+			":" +
+			(totalMinutes < 10 ? "0" + totalMinutes : totalMinutes);
+
+		totalTimeForCurrentDateDisplay.innerText = "Today " + totalTime;
+	}
+
 	function clearTimer() {
 		localStorage.clear();
 		displayTimeSheets();
 		displayTotalTimeWorked();
+		displayTotalTimeForCurrentDate();
 	}
 
+	function getCurrentDateFromStorage() {
+		const storedDate = localStorage.getItem("currentDate");
+		return storedDate ? new Date(storedDate) : new Date();
+	}
+
+	function saveCurrentDateToStorage(date) {
+		localStorage.setItem("currentDate", date.toISOString());
+	}
+
+	function formatDate(date) {
+		const options = { day: "2-digit", month: "short" };
+		return date.toLocaleDateString("en-US", options).toLowerCase();
+	}
+
+	function updateHeading() {
+		const now = new Date();
+		const hours = now.getHours();
+		const minutes = now.getMinutes();
+		const formattedDate = formatDate(currentDate);
+		headingDisplay.innerText = `Timer ${formattedDate} ${
+			hours < 10 ? "0" + hours : hours
+		}:${minutes < 10 ? "0" + minutes : minutes}`;
+	}
+
+	// Initial setup
+	document.title = "Timer";
+	updateHeading();
 	displayTimeSheets();
-	displayTodayTime();
 	displayTotalTimeWorked();
-	setInterval(displayTodayTime, 60000);
+	displayTotalTimeForCurrentDate();
+	setInterval(updateHeading, 60000);
+
+	console.log("Formatted Date:", formatDate(currentDate));
 });
