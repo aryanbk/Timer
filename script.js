@@ -1,186 +1,124 @@
-document.addEventListener("DOMContentLoaded", (event) => {
+document.addEventListener("DOMContentLoaded", () => {
+	// Timer variables
 	let startTime;
-	let updatedTime;
-	let difference;
-	let tInterval;
-	let taskName;
-	let catName;
-	let running = false;
+	let timerInterval;
+	let isRunning = false;
 
+	// DOM elements
 	const startButton = document.getElementById("startButton");
 	const stopButton = document.getElementById("stopButton");
 	const resetButton = document.getElementById("resetButton");
 	const clearButton = document.getElementById("clearButton");
-	const timerDisplay = document.getElementById("timer");
+	const currentTimerDisplay = document.getElementById("currentTimer");
 	const timesheetTable = document.getElementById("timesheetTable");
 	const taskInput = document.getElementById("task-name");
-	const catInput = document.getElementById("category");
-	const headingDisplay = document.getElementById("h1");
+	const categoryInput = document.getElementById("category");
+	const currentDateTimeDisplay = document.getElementById("currentDateTime");
 	const totalTimeWorkedDisplay = document.getElementById("totalTimeWorked");
-	const totalTimeForCurrentDateDisplay = document.getElementById("todayTime");
+	const todayTimeDisplay = document.getElementById("todayTime");
 	const updateDateButton = document.getElementById("updateDateButton");
 
+	// Event listeners
 	startButton.addEventListener("click", startTimer);
 	stopButton.addEventListener("click", stopTimer);
 	resetButton.addEventListener("click", resetTimer);
-	clearButton.addEventListener("click", clearTimer);
+	clearButton.addEventListener("click", clearAllData);
+	updateDateButton.addEventListener("click", updateCurrentDate);
 
 	let currentDate = getCurrentDateFromStorage();
-
-	updateDateButton.addEventListener("click", updateCurrentDate);
 
 	function updateCurrentDate() {
 		currentDate = new Date();
 		saveCurrentDateToStorage(currentDate);
-		updateHeading();
+		updateDateTimeDisplay();
 		displayTotalTimeForCurrentDate();
 	}
 
 	function startTimer() {
-		if (!running && taskInput.value.trim() != "") {
-			taskName = taskInput.value.trim().toLowerCase();
-			catName = catInput.value.trim().toLowerCase();
+		if (!isRunning && taskInput.value.trim() !== "") {
 			startTime = new Date().getTime();
-			tInterval = setInterval(getShowTime, 1);
-			running = true;
+			timerInterval = setInterval(updateTimerDisplay, 1000);
+			isRunning = true;
 			saveCurrentDateToStorage(currentDate);
 		}
 	}
 
 	function stopTimer() {
-		if (running) {
-			clearInterval(tInterval);
-			addTimeSheet();
-			running = false;
-			timerDisplay.innerHTML = "00:00:00";
+		if (isRunning) {
+			clearInterval(timerInterval);
+			addTimesheet();
+			isRunning = false;
+			currentTimerDisplay.textContent = "00:00:00";
 		}
 	}
 
 	function resetTimer() {
-		clearInterval(tInterval);
-		timerDisplay.innerHTML = "00:00:00";
-		running = false;
+		clearInterval(timerInterval);
+		currentTimerDisplay.textContent = "00:00:00";
+		isRunning = false;
 	}
 
-	function getShowTime() {
-		updatedTime = new Date().getTime();
-		difference = updatedTime - startTime;
-
-		let hours = Math.floor(
-			(difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-		);
-		let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-		let seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-		timerDisplay.innerHTML =
-			(hours < 10 ? "0" + hours : hours) +
-			":" +
-			(minutes < 10 ? "0" + minutes : minutes) +
-			":" +
-			(seconds < 10 ? "0" + seconds : seconds);
+	function updateTimerDisplay() {
+		const elapsedTime = new Date().getTime() - startTime;
+		const formattedTime = formatTime(elapsedTime);
+		currentTimerDisplay.textContent = formattedTime;
 	}
 
-	function addTimeSheet() {
-		const timeSheet = {
-			time: timerDisplay.innerHTML,
-			task: taskName,
-			category: catName,
+	function addTimesheet() {
+		const timesheet = {
+			time: currentTimerDisplay.textContent,
+			task: taskInput.value.trim().toLowerCase(),
+			category: categoryInput.value.trim().toLowerCase(),
 			date: formatDate(currentDate),
 		};
-		const timeSheets = getStoredTimeSheets();
-		timeSheets.push(timeSheet);
-		localStorage.setItem("timeSheets", JSON.stringify(timeSheets));
-		displayTimeSheets();
+		const timesheets = getStoredTimesheets();
+		timesheets.push(timesheet);
+		localStorage.setItem("timesheets", JSON.stringify(timesheets));
+		displayTimesheets();
 		displayTotalTimeWorked();
 	}
 
-	function getStoredTimeSheets() {
-		const timeSheets = localStorage.getItem("timeSheets");
-		return timeSheets ? JSON.parse(timeSheets) : [];
+	function getStoredTimesheets() {
+		const timesheets = localStorage.getItem("timesheets");
+		return timesheets ? JSON.parse(timesheets) : [];
 	}
 
-	function displayTimeSheets() {
-		const timeSheets = getStoredTimeSheets();
+	function displayTimesheets() {
+		const timesheets = getStoredTimesheets();
 		timesheetTable.innerHTML = "";
-		timeSheets.forEach((timeSheet) => {
-			const tr = document.createElement("tr");
-			const tdTime = document.createElement("td");
-			const tdTask = document.createElement("td");
-			const tdCat = document.createElement("td");
-			const tdDate = document.createElement("td");
-
-			tdTime.innerText = timeSheet.time;
-			tdTask.innerText = timeSheet.task;
-			tdCat.innerText = timeSheet.category;
-			tdDate.innerText = timeSheet.date;
-
-			tr.appendChild(tdTime);
-			tr.appendChild(tdTask);
-			tr.appendChild(tdCat);
-			tr.appendChild(tdDate);
-
-			timesheetTable.appendChild(tr);
+		timesheets.forEach((timesheet) => {
+			const row = timesheetTable.insertRow();
+			row.insertCell().textContent = timesheet.time;
+			row.insertCell().textContent = timesheet.task;
+			row.insertCell().textContent = timesheet.category;
+			row.insertCell().textContent = timesheet.date;
 		});
-	}
-
-	function displayTodayTime() {
-		const now = new Date();
-		const hours = now.getHours();
-		const minutes = now.getMinutes();
-		headingDisplay.innerText =
-			"Timer  " +
-			(hours < 10 ? "0" + hours : hours) +
-			":" +
-			(minutes < 10 ? "0" + minutes : minutes);
 	}
 
 	function displayTotalTimeWorked() {
-		const timeSheets = getStoredTimeSheets();
-		let totalSeconds = 0;
-
-		timeSheets.forEach((timeSheet) => {
-			const [hours, minutes, seconds] = timeSheet.time
-				.split(":")
-				.map(Number);
-			totalSeconds += hours * 3600 + minutes * 60 + seconds;
-		});
-
-		const totalHours = Math.floor(totalSeconds / 3600);
-		const totalMinutes = Math.floor((totalSeconds % 3600) / 60);
-		const totalTime =
-			(totalHours < 10 ? "0" + totalHours : totalHours) +
-			":" +
-			(totalMinutes < 10 ? "0" + totalMinutes : totalMinutes);
-
-		totalTimeWorkedDisplay.innerText = "Total " + totalTime;
+		const timesheets = getStoredTimesheets();
+		const totalSeconds = timesheets.reduce((total, timesheet) => {
+			return total + timeToSeconds(timesheet.time);
+		}, 0);
+		const totalTime = formatTimeHHMM(totalSeconds);
+		totalTimeWorkedDisplay.textContent = "Total " + totalTime;
 	}
 
 	function displayTotalTimeForCurrentDate() {
-		const timeSheets = getStoredTimeSheets();
-		let totalSeconds = 0;
-
-		timeSheets.forEach((timeSheet) => {
-			if (timeSheet.date === formatDate(currentDate)) {
-				const [hours, minutes, seconds] = timeSheet.time
-					.split(":")
-					.map(Number);
-				totalSeconds += hours * 3600 + minutes * 60 + seconds;
+		const timesheets = getStoredTimesheets();
+		const totalSeconds = timesheets.reduce((total, timesheet) => {
+			if (timesheet.date === formatDate(currentDate)) {
+				return total + timeToSeconds(timesheet.time);
 			}
-		});
-
-		const totalHours = Math.floor(totalSeconds / 3600);
-		const totalMinutes = Math.floor((totalSeconds % 3600) / 60);
-		const totalTime =
-			(totalHours < 10 ? "0" + totalHours : totalHours) +
-			":" +
-			(totalMinutes < 10 ? "0" + totalMinutes : totalMinutes);
-
-		totalTimeForCurrentDateDisplay.innerText = "Today " + totalTime;
+			return total;
+		}, 0);
+		const totalTime = formatTimeHHMM(totalSeconds);
+		todayTimeDisplay.textContent = "Today " + totalTime;
 	}
 
-	function clearTimer() {
+	function clearAllData() {
 		localStorage.clear();
-		displayTimeSheets();
+		displayTimesheets();
 		displayTotalTimeWorked();
 		displayTotalTimeForCurrentDate();
 	}
@@ -194,28 +132,68 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		localStorage.setItem("currentDate", date.toISOString());
 	}
 
-	function formatDate(date) {
+	function formatDateMMMDD(date) {
 		const options = { day: "2-digit", month: "short" };
 		return date.toLocaleDateString("en-US", options).toLowerCase();
 	}
 
-	function updateHeading() {
+	function formatDateMMMDD(date) {
+		const options = { day: "2-digit", month: "short" };
+		return date.toLocaleDateString("en-US", options).toLowerCase();
+	}
+
+	function formatDateMMDD(date) {
+		return date
+			.toLocaleDateString("en-US", {
+				month: "2-digit",
+				day: "2-digit",
+			})
+			.replace("/", "-");
+	}
+
+	function formatDate(date) {
+		return formatDateMMDD(date);
+	}
+
+	function updateDateTimeDisplay() {
 		const now = new Date();
-		const hours = now.getHours();
-		const minutes = now.getMinutes();
 		const formattedDate = formatDate(currentDate);
-		headingDisplay.innerText = `Timer ${formattedDate} ${
-			hours < 10 ? "0" + hours : hours
-		}:${minutes < 10 ? "0" + minutes : minutes}`;
+		const formattedTime = now.toLocaleTimeString("en-US", {
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: false,
+		});
+		currentDateTimeDisplay.textContent = `Timer ${formattedDate} ${formattedTime}`;
+	}
+
+	function formatTime(milliseconds) {
+		const totalSeconds = Math.floor(milliseconds / 1000);
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const seconds = totalSeconds % 60;
+		return [hours, minutes, seconds]
+			.map((num) => num.toString().padStart(2, "0"))
+			.join(":");
+	}
+
+	function timeToSeconds(timeString) {
+		const [hours, minutes, seconds] = timeString.split(":").map(Number);
+		return hours * 3600 + minutes * 60 + seconds;
+	}
+
+	function formatTimeHHMM(seconds) {
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		return `${hours.toString().padStart(2, "0")}:${minutes
+			.toString()
+			.padStart(2, "0")}`;
 	}
 
 	// Initial setup
 	document.title = "Timer";
-	updateHeading();
-	displayTimeSheets();
+	updateDateTimeDisplay();
+	displayTimesheets();
 	displayTotalTimeWorked();
 	displayTotalTimeForCurrentDate();
-	setInterval(updateHeading, 60000);
-
-	console.log("Formatted Date:", formatDate(currentDate));
+	setInterval(updateDateTimeDisplay, 60000);
 });

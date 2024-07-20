@@ -2,7 +2,7 @@ body {
 	font-family: Arial, sans-serif;
 	background-color: #f4f4f9;
 	margin: 0;
-	padding: 5px;
+	padding: 20px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -10,19 +10,19 @@ body {
 
 h1 {
 	color: #333;
-	margin-bottom: 5px;
+	margin-bottom: 20px;
 }
 
 h3 {
-	margin-top: 5px;
+	margin-top: 10px;
 }
 
 .input-container,
 .display-container,
 .timesheets-container {
 	background-color: #fff;
-	padding: 15px;
-	margin: 5px;
+	padding: 20px;
+	margin: 10px 0;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	width: 90%;
@@ -36,11 +36,12 @@ label {
 }
 
 input[type="text"] {
-	width: calc(100% - 20px);
+	width: 100%;
 	padding: 10px;
-	margin-bottom: 5px;
+	margin-bottom: 15px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
+	box-sizing: border-box;
 }
 
 button {
@@ -64,16 +65,17 @@ button:disabled {
 	cursor: not-allowed;
 }
 
-.display-container p {
-	font-size: 18px;
-	margin: 5px 0;
-	color: #333;
+#timers {
+	display: flex;
+	justify-content: space-between;
+	margin: 5px;
 }
 
 #timers p {
 	font-size: 20px;
 	font-weight: bold;
 	color: #007bff;
+	margin: 0;
 }
 
 table {

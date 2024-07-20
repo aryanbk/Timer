@@ -8,32 +8,24 @@
 		<link rel="icon" type="image/x-icon" href="sand-clock-16.png" />
 	</head>
 	<body>
-		<h1 id="h1"></h1>
+		<h1 id="currentDateTime"></h1>
 		<div class="input-container">
-			<label>Name</label>
+			<label for="task-name">Name</label>
 			<input type="text" id="task-name" />
-			<br /><br />
-			<label>Category</label>
+			<label for="category">Category</label>
 			<input type="text" id="category" />
-			<br /><br />
-			<button id="startButton">Start</button>
-			<button id="stopButton">Stop</button>
-			<button id="resetButton">Reset</button>
-			<button id="clearButton">Clear</button>
-			<button id="updateDateButton">Update Date</button>
+			<div class="button-container">
+				<button id="startButton">Start</button>
+				<button id="stopButton">Stop</button>
+				<button id="resetButton">Reset</button>
+				<button id="clearButton">Clear</button>
+				<button id="updateDateButton">Update Date</button>
+			</div>
 		</div>
 		<br />
 		<div class="display-container">
-			<p id="time"></p>
-			<div
-				id="timers"
-				style="
-					width: 100%;
-					display: flex;
-					justify-content: space-between;
-				"
-			>
-				<p id="timer">00:00:00</p>
+			<div id="timers">
+				<p id="currentTimer">00:00:00</p>
 				<p id="todayTime"></p>
 				<p id="totalTimeWorked"></p>
 			</div>
