@@ -4,32 +4,42 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Timer Web App</title>
+		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
-		<h1>Timer Web App</h1>
-		<div>
+		<h1 id="h1"></h1>
+		<div class="input-container">
 			<label>Name</label>
 			<input type="text" id="task-name" />
-			<br />
-			<br />
+			<br /><br />
 			<label>Category</label>
 			<input type="text" id="category" />
-			<br />
-			<br />
+			<br /><br />
 			<button id="startButton">Start</button>
 			<button id="stopButton">Stop</button>
 			<button id="resetButton">Reset</button>
 			<button id="clearButton">Clear</button>
 		</div>
-		<div>
+		<br />
+		<div class="display-container">
 			<p id="time"></p>
-			<p id="timer">00:00:00</p>
+			<div
+				id="timers"
+				style="
+					width: 100%;
+					display: flex;
+					justify-content: space-between;
+				"
+			>
+				<p id="timer">00:00:00</p>
+				<p id="totalTimeWorked"></p>
+			</div>
+			<p id="todayTime"></p>
 		</div>
-		<div>
-			<h2>Time-sheets</h2>
-            <table border='1' style='border-collapse:collapse' id="timesheetTable">
-
+		<div class="timesheets-container">
+			<h3>Timesheets</h3>
+			<table id="timesheetTable"></table>
 		</div>
-		<script src="index.js"></script>
+		<script src="script.js"></script>
 	</body>
 </html>
