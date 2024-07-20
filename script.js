@@ -144,6 +144,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		displayTotalTimeWorked();
 	}
 
+	window.onbeforeunload = function () {
+		return "Current timer will be lost if you refresh the page. Are you sure?";
+	};
+
 	displayTimeSheets();
 	displayTodayTime();
 	displayTotalTimeWorked();
