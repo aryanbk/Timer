@@ -138,11 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		return date.toLocaleDateString("en-US", options).toLowerCase();
 	}
 
-	function formatDateMMMDD(date) {
-		const options = { day: "2-digit", month: "short" };
-		return date.toLocaleDateString("en-US", options).toLowerCase();
-	}
-
 	function formatDateMMDD(date) {
 		return date
 			.toLocaleDateString("en-US", {
@@ -188,6 +183,68 @@ document.addEventListener("DOMContentLoaded", () => {
 		return `${hours.toString().padStart(2, "0")}:${minutes
 			.toString()
 			.padStart(2, "0")}`;
+	}
+
+	function updateEntryDate(entryNumber, newDate) {
+		let timesheets = JSON.parse(localStorage.getItem("timesheets") || "[]");
+
+		if (entryNumber > 0 && entryNumber <= timesheets.length) {
+			timesheets[entryNumber - 1].date = newDate;
+			localStorage.setItem("timesheets", JSON.stringify(timesheets));
+
+			const timesheetTable = document.getElementById("timesheetTable");
+			timesheetTable.innerHTML = "";
+			timesheets.forEach((timesheet) => {
+				const row = timesheetTable.insertRow();
+				row.insertCell().textContent = timesheet.time;
+				row.insertCell().textContent = timesheet.task;
+				row.insertCell().textContent = timesheet.category;
+				row.insertCell().textContent = timesheet.date;
+			});
+
+			const today = new Date()
+				.toLocaleDateString("en-US", {
+					month: "2-digit",
+					day: "2-digit",
+				})
+				.replace("/", "-");
+
+			const totalSeconds = timesheets.reduce(
+				(total, timesheet) => total + timeToSeconds(timesheet.time),
+				0
+			);
+			const totalTime = formatTimeHHMM(totalSeconds);
+			document.getElementById("totalTimeWorked").textContent =
+				"Total " + totalTime;
+
+			const todaySeconds = timesheets.reduce((total, timesheet) => {
+				return timesheet.date === today
+					? total + timeToSeconds(timesheet.time)
+					: total;
+			}, 0);
+			const todayTime = formatTimeHHMM(todaySeconds);
+			document.getElementById("todayTime").textContent =
+				"Today " + todayTime;
+
+			console.log(`Entry ${entryNumber} updated to date: ${newDate}`);
+		} else {
+			console.log(
+				"Invalid entry number. Please provide a valid entry number."
+			);
+		}
+
+		function timeToSeconds(timeString) {
+			const [hours, minutes, seconds] = timeString.split(":").map(Number);
+			return hours * 3600 + minutes * 60 + seconds;
+		}
+
+		function formatTimeHHMM(seconds) {
+			const hours = Math.floor(seconds / 3600);
+			const minutes = Math.floor((seconds % 3600) / 60);
+			return `${hours.toString().padStart(2, "0")}:${minutes
+				.toString()
+				.padStart(2, "0")}`;
+		}
 	}
 
 	// Initial setup
